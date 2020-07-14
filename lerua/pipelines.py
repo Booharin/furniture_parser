@@ -1,10 +1,20 @@
 from scrapy.pipelines.images import ImagesPipeline
+from pymongo import MongoClient
 import scrapy
 
+
 class DataBasePipeline:
+    def __init__(self):
+        self.mongo_client = MongoClient("mongodb://admin:12345@18.197.155.243/my_db")
+        self.photos = self.mongo_client.my_db.photos
+
     def process_item(self, item, spider):
-        print(1)
+        self.photos.replace_one(item, item, upsert=True)
         return item
+
+    def __del__(self):
+        self.mongo_client.close()
+
 
 class LeruaPhotosPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
@@ -16,5 +26,7 @@ class LeruaPhotosPipeline(ImagesPipeline):
                     print(e)
 
     def item_completed(self, results, item, info):
-        print(1)
+        if results:
+            item['photo_links'] = [itm[1] for itm in results if itm[0]]
+        return item
 
