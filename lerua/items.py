@@ -7,6 +7,14 @@ import scrapy
 
 
 class LeruaItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    title = scrapy.Field()
+    link = scrapy.Field()
+    price = scrapy.Field()
+    photo_links = scrapy.Field()
+    country = scrapy.Field()
+    weight = scrapy.Field()
+    width = scrapy.Field()
+    height = scrapy.Field()
+    depth = scrapy.Field()
+    length = scrapy.Field()
+
