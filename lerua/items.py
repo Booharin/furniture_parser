@@ -34,27 +34,4 @@ class LeruaItem(scrapy.Item):
         output_processor=TakeFirst()
     )
     photo_links = scrapy.Field(input_processor=MapCompose(cleaner_photo))
-    country = scrapy.Field(
-        input_processor=MapCompose(clean_parameter),
-        output_processor=TakeFirst()
-    )
-    weight = scrapy.Field(
-        input_processor=MapCompose(float_parameter),
-        output_processor=TakeFirst()
-    )
-    width = scrapy.Field(
-        input_processor=MapCompose(float_parameter),
-        output_processor=TakeFirst()
-    )
-    height = scrapy.Field(
-        input_processor=MapCompose(float_parameter),
-        output_processor=TakeFirst()
-    )
-    depth = scrapy.Field(
-        input_processor=MapCompose(float_parameter),
-        output_processor=TakeFirst()
-    )
-    length = scrapy.Field(
-        input_processor=MapCompose(float_parameter),
-        output_processor=TakeFirst()
-    )
+    parameters_dict = scrapy.Field(input_processop=MapCompose)

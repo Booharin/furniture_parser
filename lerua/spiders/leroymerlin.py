@@ -2,6 +2,7 @@ import scrapy
 from scrapy.http import HtmlResponse
 from scrapy.loader import ItemLoader
 from lerua.items import LeruaItem
+import re
 
 class LeroymerlinSpider(scrapy.Spider):
     name = 'leroymerlin'
@@ -21,11 +22,28 @@ class LeroymerlinSpider(scrapy.Spider):
         loader.add_value('link', response.url)
         loader.add_css('price', 'span[slot=price]::text')
         loader.add_css('photo_links', 'uc-pdp-media-carousel[slot=media-content] img::attr(src)')
-        loader.add_xpath('weight', "//div[dt[text()='Вес, кг']]//dd/text()")
-        loader.add_xpath('country', "//div[dt[text()='Страна производства']]//dd/text()")
-        loader.add_xpath('width', "//div[dt[text()='Общая ширина (см)']]//dd/text()")
-        loader.add_xpath('height', "//div[dt[text()='Общая высота (см)']]//dd/text()")
-        loader.add_xpath('depth', "//div[dt[text()='Глубина (см)']]//dd/text()")
-        loader.add_xpath('length', "//div[dt[text()='Длина (см)']]//dd/text()")
 
+        parameters = response.css('div[class=def-list__group]')
+        parameters_dict = {}
+        for parameter in parameters:
+            key = parameter.css('dt[class=def-list__term]::text')\
+                .extract_first()\
+                .replace('\n', '')
+            value = parameter.css('dd[class=def-list__definition]::text')\
+                .extract_first()\
+                .replace(' ', '')\
+                .replace('\n', '')
+
+            if self.hasNumbers(value):
+                try:
+                    value = float(value)
+                except Exception as e:
+                    print(e)
+
+            parameters_dict[key] = value
+
+        loader.add_value('parameters_dict', parameters_dict)
         yield loader.load_item()
+
+    def hasNumbers(self, inputString):
+        return bool(re.search(r'\d', inputString))
