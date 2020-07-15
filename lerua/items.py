@@ -13,7 +13,7 @@ def cleaner_photo(value):
 
 
 def clean_price(value):
-    return int(value)
+    return int(value.replace(' ', ''))
 
 
 def clean_parameter(value):

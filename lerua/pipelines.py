@@ -21,9 +21,15 @@ class LeruaPhotosPipeline(ImagesPipeline):
         if item['photo_links']:
             for img_link in item['photo_links']:
                 try:
-                    yield scrapy.Request(img_link)
+                    yield scrapy.Request(img_link, meta=item)
                 except Exception as e:
                     print(e)
+
+    def file_path(self, request, response=None, info=None):
+        item = request.meta
+        name = request.url.split('/')[-1]
+        return f"/{item['title']}/{name}.jpg"
+
 
     def item_completed(self, results, item, info):
         if results:
