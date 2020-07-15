@@ -1,5 +1,6 @@
 import scrapy
 from scrapy.http import HtmlResponse
+from scrapy.loader import ItemLoader
 from lerua.items import LeruaItem
 
 class LeroymerlinSpider(scrapy.Spider):
@@ -15,52 +16,16 @@ class LeroymerlinSpider(scrapy.Spider):
             yield response.follow(link, callback=self.parse_furniture)
 
     def parse_furniture(self, response: HtmlResponse):
-        link = response.url
-        title = response.css('h1::text').extract_first()
-        price = int(response.css('span[slot=price]::text').extract_first())
-        photo_links = list(
-            filter(
-                lambda s: 'w_1200' in s,
-                response.css('uc-pdp-media-carousel[slot=media-content] img::attr(src)').extract()
-            )
-        )
-        weight = float(
-            response.xpath("//div[dt[text()='Вес, кг']]//dd/text()")
-            .extract_first().replace(' ', '')
-            .replace('\n', '')
-        )
-        country = response.xpath("//div[dt[text()='Страна производства']]//dd/text()")\
-            .extract_first()\
-            .replace(' ', '')\
-            .replace('\n', '')
-        width = float(
-            response.xpath("//div[dt[text()='Общая ширина (см)']]//dd/text()")
-                .extract_first().replace(' ', '')
-                .replace('\n', '')
-        )
-        height = float(
-            response.xpath("//div[dt[text()='Общая высота (см)']]//dd/text()")
-                .extract_first().replace(' ', '')
-                .replace('\n', '')
-        )
-        depth = float(
-            response.xpath("//div[dt[text()='Глубина (см)']]//dd/text()")
-                .extract_first().replace(' ', '')
-                .replace('\n', '')
-        )
-        length = float(
-            response.xpath("//div[dt[text()='Длина (см)']]//dd/text()")
-                .extract_first().replace(' ', '')
-                .replace('\n', '')
-        )
+        loader = ItemLoader(item=LeruaItem(), response=response)
+        loader.add_css('title', 'h1::text')
+        loader.add_value('link', response.url)
+        loader.add_css('price', 'span[slot=price]::text')
+        loader.add_css('photo_links', 'uc-pdp-media-carousel[slot=media-content] img::attr(src)')
+        loader.add_xpath('weight', "//div[dt[text()='Вес, кг']]//dd/text()")
+        loader.add_xpath('country', "//div[dt[text()='Страна производства']]//dd/text()")
+        loader.add_xpath('width', "//div[dt[text()='Общая ширина (см)']]//dd/text()")
+        loader.add_xpath('height', "//div[dt[text()='Общая высота (см)']]//dd/text()")
+        loader.add_xpath('depth', "//div[dt[text()='Глубина (см)']]//dd/text()")
+        loader.add_xpath('length', "//div[dt[text()='Длина (см)']]//dd/text()")
 
-        yield LeruaItem(title=title,
-                        link=link,
-                        price=price,
-                        weight=weight,
-                        country=country,
-                        width=width,
-                        height=height,
-                        depth=depth,
-                        length=length,
-                        photo_links=photo_links)
+        yield loader.load_item()
